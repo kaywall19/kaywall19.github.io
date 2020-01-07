@@ -69,6 +69,7 @@ h4 {
 #assignments {
   display: flex;
   flex-wrap: wrap;
+  padding-top: 20px;
 }
 
 .assignment {
