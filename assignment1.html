@@ -22,7 +22,7 @@
         <h5>01: Schematic</h5>
         <section id= "schematic">
           <figure>
-            <img src="A1_Blink/MVIMG_20200109_140816.jpg" alt="schematic"/>
+            <img src="A1_Blink/schematic.jpg" alt="schematic"/>
             <figcaption>
               This is my schematic diagram and it's pretty cool huh
             </figcaption>
@@ -30,22 +30,82 @@
         </section>
         <h5>02: Arduino Code</h5>
         <section id= "code">
-          <figure id="code1">
-            <img src="A1_Blink/code snippet 1.png" alt="code1"/>
-            <figcaption>
-              This code snippet completes the setup by initializing all the pins that the LED's are
+          <figure>
+            <pre><code>
+                          /*
+              A1 Blink
+              January 9, 2020
+              Kay Waller
+              HCDE 439
+
+              This program turns on three LED's independently of each other. This program
+              borrows heavily from:
+
+                Scott Fitzgerald (modified 8 May 2014)
+                Arturo Guadalupi (modified 2 Sep 2016)
+                Colby Newman (modified 8 Sep 2016)
+            */
+
+            // the setup function runs once the reset is pressed or the board is powered.
+            void setup() {
+
+              // initialize digital pin 10 as an output. This is the far right yellow LED.
+              pinMode(10, OUTPUT);
+
+              // initialize digital pin 6 as an output. This is the middle white LED.
+              pinMode(6, OUTPUT);
+
+              // initialize digital pin 2 as an output. This is the far left yellow LED.
+              pinMode(2, OUTPUT);
+
+            }
+
+            // the loop function runs continously and turns all LED's on and off.
+            void loop() {
+
+              // for the far right yellow light
+              // turn the far right yellow LED on
+              digitalWrite(10, HIGH);
+              // wait for 4 seconds
+              delay(4000);
+              // turn the far right yellow LED off
+              digitalWrite(10, LOW);
+              // wait for 1/10th of a second
+              delay(10);
+
+              // for the middle white light
+              // turn the middle white LED on
+              digitalWrite(6, HIGH);
+              // wait for 1/4th of a second
+              delay(250);
+              // turn the middle white LED off
+              digitalWrite(6, LOW);
+              // wait for 1/10th of a second
+              delay(10);
+
+              // for the far left yellow light
+              // turn the far left yellow light on
+              digitalWrite(2, HIGH);
+              // wait for 1 second
+              delay(1000);
+              // turn the far left yellow LED off
+              digitalWrite(2, LOW);
+              // wait 1/10th of a second
+              delay(10);
+            }
+            <pre><code>
+            <figcaption id= "code-caption">
+              The setup() function completes the setup by initializing all the pins that the LED's are
               connected to. The far right yellow LED is pin 10, the middle white LED is pin 6, and
-              the far left yellow LED is pin 2.
-            </figcaption>
-          </figure>
-          <figure id="code2">
-            <img src="A1_Blink/code snippet 2.png" alt="code2"/>
-            <figcaption>
-              This code snippet makes the LED's blink in a pattern. The code is organized into three
-              sections: the far right yellow LED, the middle white LED, and the far left yellow LED.
-              The yellow LED on the right is on for 4 seconds, the white LED is on for 1/4th of a
-              second, and the yellow LED on the left is on for one second. 1/10th of a second passes
-              each time before the system blinks the next light.
+              the far left yellow LED is pin 2. The loop() function makes the LED's blink in a pattern.
+              The code is organized into three sections: the far right yellow LED, the middle white
+              LED, and the far left yellow LED. The yellow LED on the right is on for 4 seconds,
+              the white LED is on for 1/4th of a second, and the yellow LED on the left is on for
+              one second. 1/10th of a second passes each time before the system blinks the next light.
+              Initially, I was confused what purpose the "delay(10);" in my code was serving, after
+              I had already turned the light on and off. Lia Johansen helped clarify for me that it
+              was the delay time before the next line of code ran (in this case, turning the next
+              light on).
             </figcaption>
           </figure>
         </section>
@@ -78,9 +138,9 @@
       <footer>
         <hr>
         <p id="footer">
-          HCDE 439
+          HCDE 439, Winter 2020
           <br>
-          Winter 2020
+          Kay Waller
           <br>
           University of Washington
         </p>

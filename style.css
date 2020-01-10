@@ -125,14 +125,6 @@ p {
   margin-top: -20px;
 }
 
-#code1 {
-  margin-right: 5px;
-}
-
-#code2 {
-  margin-left: 5px;
-}
-
 #video img {
   margin: auto auto;
   height: 700px;
@@ -175,4 +167,13 @@ h5 {
 
 main {
   margin-top: 60px;
+}
+
+pre {
+  margin-top: -30px;
+}
+
+#code-caption {
+  margin-top: -10px;
+  margin-bottom: -70px;
 }
