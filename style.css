@@ -106,3 +106,30 @@ a:hover {
 #assignment-profile {
   margin-top: 0px;
 }
+
+p {
+  font-size: 14px;
+  line-height: 24px;
+  font-family: "Assistant", sans-serif;
+}
+
+#code {
+  display: flex;
+  justify-content: center;
+}
+
+#code img {
+  height: 450px;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 7px;
+}
+
+figcaption {
+  font-size: 14px;
+  line-height: 24px;
+  font-family: "Assistant", sans-serif;
+  text-align: center;
+  font-style: italic;
+}
