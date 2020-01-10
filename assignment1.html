@@ -14,26 +14,66 @@
         <h4>Kay Waller</h4>
       </div>
       <main>
-        <p>
+        <h5>00: Overview</h5>
+        <p id="overview">
           This assignment is called Blink!, and requires us to make three LED's blink independently
           of one another using Arduino.
         </p>
-        <section id= "code">
+        <h5>01: Schematic</h5>
+        <section id= "schematic">
           <figure>
-            <img src="A1_Blink/code snippet 1.png" alt="code1"/>
+            <img src="A1_Blink/MVIMG_20200109_140816.jpg" alt="schematic"/>
             <figcaption>
-              words
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="A1_Blink/code snippet 2.png" alt="code2"/>
-            <figcaption>
-              words
+              This is my schematic diagram and it's pretty cool huh
             </figcaption>
           </figure>
         </section>
-        <img src="A1_Blink/MVIMG_20200109_140816.jpg" alt="overview pic"/>
-        <iframe src="A1_Blink/VID_20200109_141033.mp4" alt="animation"/>
+        <h5>02: Arduino Code</h5>
+        <section id= "code">
+          <figure id="code1">
+            <img src="A1_Blink/code snippet 1.png" alt="code1"/>
+            <figcaption>
+              This code snippet completes the setup by initializing all the pins that the LED's are
+              connected to. The far right yellow LED is pin 10, the middle white LED is pin 6, and
+              the far left yellow LED is pin 2.
+            </figcaption>
+          </figure>
+          <figure id="code2">
+            <img src="A1_Blink/code snippet 2.png" alt="code2"/>
+            <figcaption>
+              This code snippet makes the LED's blink in a pattern. The code is organized into three
+              sections: the far right yellow LED, the middle white LED, and the far left yellow LED.
+              The yellow LED on the right is on for 4 seconds, the white LED is on for 1/4th of a
+              second, and the yellow LED on the left is on for one second. 1/10th of a second passes
+              each time before the system blinks the next light.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>03: System Media</h5>
+        <section id= "video">
+          <figure>
+            <img src="A1_Blink/MVIMG_20200109_140816.jpg" alt="circuit pic"/>
+            <figcaption>
+              This is my circuit, complete with three LED's, three resistors, and multiple wires
+              that connect to both ground and power. Using the equation V=IR, I determined the
+              correct magnitude for the resistors. The voltage coming from the computer is 5V,
+              and the LED's need 20mA to run. This means 5V=20mA * R. 20mA is .02A, so 5V=.02A * R.
+              Dividing both sides by .02A, you get 250 = R. Although not exactly 250, I used the
+              220 resistors because they were the closest.
+            </figcaption>
+          </figure>
+          <figure>
+            <video src="A1_Blink/VID_20200109_141033.mp4" alt="animation" width= "350" controls>
+              Your browser does not support the video tag.
+            </video>
+            <figcaption>
+              This is my circuit in action, looping once. The far right yellow LED starts on first,
+              then moving to the white LED for a brief time, then ending with the far left LED. The
+              lights would continue blinking indefinitely, but the video cuts out after one loop.
+              </thead>
+            </figcaption>
+          </figure>
+        </section>
       </main>
       <footer>
         <hr>
