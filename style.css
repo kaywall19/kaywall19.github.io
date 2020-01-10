@@ -56,7 +56,7 @@ h4 {
   font-style: italic;
 }
 
-#title {
+.title {
   margin-top: -200px;
 }
 
@@ -103,6 +103,6 @@ a:hover {
   color:#EA5848;
 }
 
-a {
-  color: purple;
+#assignment-profile {
+  margin-top: 0px;
 }
