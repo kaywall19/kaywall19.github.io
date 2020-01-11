@@ -24,7 +24,8 @@
           <figure>
             <img src="A1_Blink/schematic.jpg" alt="schematic"/>
             <figcaption>
-              This is my schematic diagram and it's pretty cool huh
+              This is the schematic of my circuit. Each LED is labeled with its voltage, pin,
+              resistor, LED color, and ground. 
             </figcaption>
           </figure>
         </section>
@@ -117,9 +118,13 @@
               This is my circuit, complete with three LED's, three resistors, and multiple wires
               that connect to both ground and power. Using the equation V=IR, I determined the
               correct magnitude for the resistors. The voltage coming from the computer is 5V,
-              and the LED's need 20mA to run. This means 5V=20mA * R. 20mA is .02A, so 5V=.02A * R.
-              Dividing both sides by .02A, you get 250 = R. Although not exactly 250, I used the
-              220 resistors because they were the closest.
+              and the LED's need 20mA to run. For the yellow LED's, this means 5V-1.8V=20mA * R.
+              20mA is .02A, so 3.2V=.02A * R. Dividing both sides by .02A, you get 160 = R.
+              Although not exactly 160, I used the 220 ohm resistors because they were the closest and
+              it's better to supply less current than more current. The white LED takes more voltage,
+              so the math changes to 5V-3.3V=20mA * R. Solving the equation gets 85 ohms. I chose to
+              use the 100 ohm resistors because they created a current of 17mA, which was close
+              enough to 20 to still power the LED but not enough to blow up the light.
             </figcaption>
           </figure>
           <figure>
