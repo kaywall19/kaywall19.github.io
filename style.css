@@ -177,3 +177,7 @@ pre {
   margin-top: -10px;
   margin-bottom: -70px;
 }
+
+.rotate {
+  transform: rotate(270deg);
+}

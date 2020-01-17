@@ -1,25 +1,212 @@
-<!DOCTYPE html> 
-<html> 
-    <head> 
-        <meta charset="utf-8"> 
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
-
-        <title>Example Student's HCDE 439 Physical Computing Page!</title> 
-
+        <title>Documentation | Kay Waller</title>
         <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Assistant:300,400,600,700,800&display=swap" rel="stylesheet">
+    </head>
+    <body>
+      <div class= "title" id ="assignment-profile">
+        <h1>Documentation</h1>
+        <h2>A2: Fade!</h2>
+        <h4>Kay Waller</h4>
+      </div>
+      <main>
+        <h5>00: Overview</h5>
+        <p id="overview">
+          This assignment is called Fade!, and requires us to use a button to turn on LED's. One of
+          the LED's should fade, meaning to gradually get dimmer.
+        </p>
+        <h5>01: Schematic</h5>
+        <section id= "schematic">
+          <figure>
+            <img src="A2_Fade/schematic.jpg" alt="schematic" class="rotate"/>
+            <figcaption>
+              This is the schematic of my circuit. The LED's and the button are all connected by the
+              Arduino, but are connected by software and Arduino hardware. Both LED's are connected
+              to different analog pins, have resistors, a yellow LED, and ground. The button is
+              powered by the 5V pin, and when pushed, completes the circuit by sending 5V down to a
+              pin measuring the input, a resistor, and ground.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>02: Arduino Code</h5>
+        <section id= "code">
+          <figure>
+            <pre><code>
+              /*
+                A2 Fade
+                January 16, 2020
+                Kay Waller
+                HCDE 439
 
-    </head> 
-    <body> 
+                This program uses a button to trigger LED's fading and blinking. This program
+                borrows heavily from "Button," by:
 
-        <div class="header">
-            <h1>Example Student's Assignment 2!</h1>
-            <p>
-            <img src="red-panda.jpg" width=400></a>
-            </p>
-            <p>
-            Here is all the documentation for assignment 2!
-            </p>
-        </div>
-        
+                  Dojo Dave (created 2005)
+                  Tom Igoe (modified 30 Aug 2011)
+              */
+
+              // the setup function runs once the reset is pressed or the board is powered
+              void setup() {
+
+                // for-loop initializes LED pins 5 and 6 as output. These pins can use analogWrite
+                for (int thisPin = 5; thisPin < 7; thisPin++) {
+                  // the respective LED pin is initialized as output
+                  pinMode(thisPin, OUTPUT);
+                }
+
+                // initializes the pin connected to the button as input
+                pinMode(2, INPUT);
+                // turn pin 6 LED on
+                digitalWrite(6, HIGH);
+                // turn pin 5 LED off
+                digitalWrite(5, LOW);
+              }
+
+              // the loop function runs continously and fades and blinks all LED's
+              void loop() {
+
+                // reads the state of the input pin 2 connected to the button
+                boolean buttonState = digitalRead(2);
+
+                // if-check used to test whether the button has been pressed or not
+                if (buttonState == HIGH) {
+
+                  // for-loop used to fade both LED's in an out 3 times
+                  for (int i = 0; i <= 2; i ++) {
+                    // variable used to keep track of pin 5 LED's opposite fading to pin 6 LED
+                    int inverse = 0;
+                    // for-loop that gradually brightens pin 5 LED and fades pin 6 LED
+                    for (int fade = 255; fade >= 0; fade -= 5) {
+                      // set the dimness of pin 6 LED to the for-loop variable fade
+                      analogWrite(6, fade);
+                      // set the brightness of pin 5 LED to the variable inverse
+                      analogWrite(5, inverse);
+                      // increase inverse so the LED gets brighter by 1 each time
+                      inverse = inverse + 1;
+                      // wait for 30 milliseconds
+                      delay(30);
+                    }
+
+                    // for-loop that gradually fades pin 5 LED and brightens pin 6 LED
+                    for (int fade = 0; fade <= 255; fade += 5) {
+                      // set the brightness of pin 6 LED to the for-loop variable fade
+                      analogWrite(6, fade);
+                      // set the dimness of pin 5 LED to the variable inverse
+                      analogWrite(5, inverse);
+                      // decrement inverse so the LED fades by 1 each time
+                      inverse = inverse - 1;
+                      // wait for 30 milliseconds
+                      delay(30);
+                    }
+
+                  }
+
+                  // blink LED's so they're opposites for 4 times
+                  for (int blink = 0; blink < 4; blink ++) {
+                    // turn pin 5 LED on
+                    digitalWrite(5, HIGH);
+                    // turn pin 6 LED off
+                    digitalWrite(6, LOW);
+                    // wait for 400 milliseconds
+                    delay(400);
+                    // turn pin 5 LED off
+                    digitalWrite(5, LOW);
+                    // turn pin 6 LED on
+                    digitalWrite(6, HIGH);
+                    // wait for 400 milliseconds
+                    delay(400);
+                  }
+
+                  // blink LED's so they're blinking at the same time for 3 times
+                  for (int blinkTwo = 0; blinkTwo < 3; blinkTwo ++) {
+                    // turn pin 5 LED on
+                    digitalWrite(5, HIGH);
+                    // turn pin 6 LED on
+                    digitalWrite(6, HIGH);
+                    // wait for 80 milliseconds
+                    delay(80);
+                    // turn pin 5 LED off
+                    digitalWrite(5, LOW);
+                    // turn pin 6 LED off
+                    digitalWrite(6, LOW);
+                    // wait for 80 milliseconds
+                    delay(80);
+                  }
+
+                  // end the sequence by turning both of the LED's on
+                  // turn pin 5 LED on
+                  digitalWrite(5, HIGH);
+                  // turn pin 6 LED on
+                  digitalWrite(6, HIGH);
+                }
+
+              }
+            <pre><code>
+            <figcaption id= "code-caption">
+              The setup() function completes the setup by initializing two pins as outputs for the
+              LED and one pin as input to store when the button is pressed. It also initializes the
+              pin 6 LED on and the pin 5 LED off. The loop() function begins by reading the input
+              of pin 2. If the button was pressed, the code that dims, brightens, and blinks the LED's
+              will run. The code begins by dimming and brightening the two LED's oppositely.
+              It does this by using analogWrite and a for-loop. The for-loop traverses values from the
+              0-255 spectrum 5 at a time, either starting at 255 and subtracting value, or starting
+              at 0 and adding value. Pin 5 begins at 0 and brightens slowly, while the same for-loop
+              dims the pin 6 LED that begins at a value of 255. The second for-loop does the opposite,
+              brightening the dim LED and dimming the bright LED. Once this pattern of dimming and
+              brightening occurs 3 times, the LED's move on to blinking. They first blink opposite
+              from each other for 4 times with a 400 millisecond delay in between blinks. They then
+              blink rapidly together for 3 times, then stay powered on. When both lights are high,
+              the sequence is complete.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>03: System Media</h5>
+        <section id= "video">
+          <figure>
+            <img src="A2_Fade/circuit photo.jpg" alt="circuit pic" id="circuit2"/>
+            <figcaption>
+              This is my circuit, complete with two LED's, three resistors, one button, and wires
+              that connect the circuit to ground and power. Using the equation V=IR, I determined the
+              correct magnitude for the LED resistors. The voltage coming from the computer is 5V,
+              and the LED's need 20mA to run. For yellow LED's, this means 5V - 1.8V = 20mA * R.
+              20mA is .02A, so 3.2V = .02A * R. Dividing both sides by .02A, you get 160 = R.
+              Although not exactly 160, I used the 220 ohm resistors because they were the closest and
+              it's better to supply less current than more current. The last resistor I needed was
+              for the button. The button has a 5V voltage drop from power to ground, and has a
+              maximum allowable current of 40 ohms. I used 30 ohms in my calculation so as to not
+              exceed the maximum. This means 5V = 30mA * R, so 5V = .03A * R. R therefore equals
+              166 ohms. Although not exactly 166, I used the 220 ohm resistor because I felt it was
+              safer to supply less current than accidentally go over the maximum.
+            </figcaption>
+          </figure>
+          <figure>
+            <video src="A2_Fade/circuit video.mp4" alt="animation" width= "800" controls muted id = "center">
+              Your browser does not support the video tag.
+            </video>
+            <figcaption>
+              This is my circuit in action, looping once. Once the button is pressed, the LED's
+              start to fade in and out, opposite of each other. Once they a complete fade out and in
+              for three times, the lights then start to blink quickly, still opposite of each other.
+              Then the lights blink together at a quicker pace for three times. The circuit ends
+              with both of the lights staying on. The video ends after one full cycle.
+              </head>
+            </figcaption>
+          </figure>
+        </section>
+      </main>
+      <footer>
+        <hr>
+        <p id="footer">
+          HCDE 439, Winter 2020
+          <br>
+          Kay Waller
+          <br>
+          University of Washington
+        </p>
+      </footer>
     </body>
 </html>
