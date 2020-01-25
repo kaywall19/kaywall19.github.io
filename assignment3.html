@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+        <title>Documentation | Kay Waller</title>
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Assistant:300,400,600,700,800&display=swap" rel="stylesheet">
+    </head>
+    <body>
+      <div class= "title" id ="assignment-profile">
+        <h1>Documentation</h1>
+        <h2>A3: InputOutput!</h2>
+        <h4>Kay Waller</h4>
+      </div>
+      <main>
+        <h5>00: Overview</h5>
+        <p id="overview">
+          This assignment is called InputOutput! and used a voltage divded with a variable resistor
+          to change the state of an LED. My assignment used a thermistor to change an LED's color
+          based on temperature.
+        </p>
+        <h5>01: Schematic</h5>
+        <section id= "schematic">
+          <figure>
+            <img src="A3_InputOutput/schematic.jpg" alt="schematic"/>
+            <figcaption>
+              This is the schematic of my circuit. I created a voltage divide with one variable
+              resistor (a thermistor) and a fixed resistor. An analog input pin between the resistors
+              measures the voltage change brought by the combination of the variable resistor that
+              changes the resistance and the voltage divide that converts the resistance change to
+              a change in voltage. Digital pins 6, 5, and 3 are connected to resistors and then come
+              together for an RGB LED. The RGB LED completes the circuit by connecting to ground.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>02: Arduino Code</h5>
+        <section id= "code">
+          <figure>
+            <pre><code>
+              /*
+                A3 InputOuput
+                January 23, 2020
+                Kay Waller
+                HCDE 439
+
+                This program uses a voltage divide with a variable resistor (thermistor) to
+                change the state of an LED. This program borrows heavily from "InputOutput," by:
+
+                  Tom Igoe (created 29 Dec 2008)
+                  Tom Igoe (modified 09 Apr 2012)
+              */
+
+              // initalizes pin A0 to register the input of the thermistor
+              const int input = A0;
+
+              // creates variables for the RGB LED by assinging pin numbers to each color
+              // assigns pin 6 as the red part of the RGB LED
+              const int outputRED = 6;
+              // assigns pin 5 as the blue part of the RGB LED
+              const int outputGREEN = 5;
+              // assigns pin 3 as the blue part of the RGB LED
+              const int outputBLUE = 3;
+
+              // creates a variable to store the reading from the thermistor
+              int sensorValue = 0;
+              // creates a variable to store a corresponding output value to be used in analogWrite functions
+              int outputValue = 0;
+              // creates a variable to store the color of the LED (determined by the temperature) to print out
+              char color = "";
+
+              // the setup function runs once the reset is pressed or the board is powered
+              void setup() {
+
+                // sets the speed of serial monitor --> Arduino communication to 9600 bits per second
+                Serial.begin(9600);
+
+                // initializes the red part of the RGB LED as an output
+                pinMode(outputRED, OUTPUT);
+                // initializes the red part of the RGB LED as an output
+                pinMode(outputGREEN, OUTPUT);
+                // initializes the red part of the RGB LED as an output
+                pinMode(outputBLUE, OUTPUT);
+
+              }
+
+              // the loop function runs continously and fades and blinks all LED's
+              void loop() {
+
+                // reads the in-value from the analog pin listening to the thermistor
+                sensorValue = analogRead(input);
+                // maps the out-value from the thermistor to a value that can be used for analogWrite
+                outputValue = map(sensorValue, 220, 500, 0, 30);
+
+                // creates three colors which will be shown depending on the value read from the thermistor
+                // tests if the value from the thermistor maps to under 10
+                if (outputValue < 10) {
+                  // set the color variable to pink to print to the monitor
+                  color = "pink";
+                  // since the value is under 10, turn the green LED off because pink needs to be made
+                  digitalWrite(outputGREEN, LOW);
+                  // set the value of the red LED higher than blue so the LED is more pink than purple
+                  analogWrite(outputRED, 80);
+                  // set the value of the blue LED so it tempers the red and makes pink
+                  analogWrite(outputBLUE, 20);
+
+                  // tests if the value from the thermistor maps to 10 or above and under 20
+                } else if (outputValue >= 10 && outputValue < 20) {
+                  // set the color variable to teal to print to the monitor
+                  color = "teal";
+                  // since the value is 10 or over, turn the red LED off because teal needs to be made
+                  digitalWrite(outputRED, LOW);
+                  // set the value of the blue LED lower than green so the LED is an aqua/teal instead of light blue
+                  analogWrite(outputBLUE, 10);
+                  // set the value of the green LED higher than the blue so it creates an aqua/teal color
+                  analogWrite(outputGREEN, 50);
+
+                  // tests if the value from the thermistor maps to between 20 and 30 (inclusive)
+                } else if (outputValue >= 20 && outputValue <= 30) {
+                  // set the color variable to orange to print to the monitor
+                  color = "orange";
+                  // since is the value is between 20 and 30, turn the blue LED off because orange need to be made
+                  digitalWrite(outputBLUE, LOW);
+                  // set the value of the red LED higher than green so the LED is orange instead of yellow
+                  analogWrite(outputRED, 80);
+                  // set the value of the green LED with just enough green to make the red LED orange
+                  analogWrite(outputGREEN, 10);
+                }
+
+                // print the word sensor so the data values are readable and assigned to categories
+                Serial.print("sensor = ");
+                // print the value the analog pin is reading from the thermistor to the monitor
+                Serial.print(sensorValue);
+                // print the word color so the colors are readable and assigned to categories
+                Serial.print("\t color = ");
+                // print the color the LED should be displaying to the monitor
+                Serial.println(color);
+
+                // wait 5 milliseconds before next reading to allow data values to settle
+                delay(5);
+
+              }
+            <pre><code>
+            <figcaption id= "code-caption">
+              Before the setup() function, a bunch of variables are assigned. This includes all
+              the input and output pins, sensor values, and a color variable to store the displayed
+              color. The setup() function initalizes the three LED's in the RGB LED and sets the
+              communication speed. The loop() function begins by reading the value from the
+              voltage divide. This is a value between 0 and 1023, although since my voltage divide
+              is smaller this range is limited. The map function maps these values to a new value
+              between 0 and 30. Normally, the map function would map values to 0-225 and the values
+              would be used in analogWrite. However, I chose to use the map function differently than
+              it's original intent. I mapped to 30 because it was easily divisible by 3. The following
+              if and if-else branches divide the map values into 3 colors. If the mapped values ie
+              under 10, the LED turns pink. This is the coldest value. If the mapped value is between
+              10 and 20, the color value is teal (this is moderate temparature). Lastly, if the
+              mapped value is coming from a room temp thermistor, it will be 20-30 and turn the LED
+              an orange color. For all of these branches, the color variable is set to the appropriate
+              displayed color.
+
+              The code also prints to the Arduino serial monitor the value read from the sensor and
+              the corresponding color the LED should be at each value, for easy debugging.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>03: System Media</h5>
+        <section id= "video">
+          <figure>
+            <img src="A3_InputOutput/circuit.jpg" alt="circuit pic" id="circuit2"/>
+            <figcaption>
+              This is my circuit, complete with 1 RGB LED, two fixed resistors, 1 variable resistor,
+              and wires that connect my circuit to ground and power. Using the equation V = IR, I
+              determined the correct resistors for the RGB LED. Both the red and green LED's use
+              1.8 V, so their calculation was 5V - 1.8V = 20mA * R. Solving this equation, you get
+              160 = R. Although not exactly 160, I used 220 ohm resistors because they were the
+              closest and it's better to supply less current than more current. The blue LED takes
+              more voltage, and uses 3.3V. The calculation is 5V - 3.3V = 20mA * R, and solving it
+              gives R = 85. Although not exactly 85, I used the 100 ohm resistor because it was the
+              closest and supplies less than max current.
+              <br>
+              <br>
+              Since I decided to use the thermistor, I needed to determine the correct amount for
+              the fixed resistor. To do this, I first looked up the thermistor in the datasheet. It
+              said the max resistance was 277.2k ohms (coldest temperature), and the least resistance was
+              61.9 ohms (warmest temperature). However, I could not reasonably achieve these conditions,
+              so I measured with a multimeter the themistor at base state (in my house) for the
+              warmest condition, and touching an ice cube for the coldest condition. I measured
+              13.3k ohm resistance for the warmest condition, and 34.4k ohm resistance for the
+              coldest condition. I also knew that V(in) was 5V.
+              <br>
+              <br>
+              Based on these values, I used the equation V(out) = (R(2) / R(1) + R(2)) * 5 to
+              determine my V(out). I plugged in 100, 220, 2k, and 10k values for R(2), and used both
+              13.3k and 34.4k as my R(1)'s. Once I had done my calcuations, I compared the the
+              different V(out) values for each resistance (min and max) at each R(2) amount against
+              each other. I found that a 10k resistor created the largest V(out) difference, and thus
+              the biggest voltage divide. The 100 ohm resistor gave a voltage difference of .023, the
+              220 ohm resistor had a difference of .049, the 2k resistor had a difference of .38, and
+              the 10k resistor had a difference of 1.02V. A large voltage divide is important because
+              I wanted my LED to fill the range and showcase a variety of values. Although my voltage
+              divide is not the highest I hoped it would be, I was unable to recreate the highest
+              and lowest temps that the thermistor could handle in it's range. This explains the low
+              voltage difference, because I'm using approximately 30% of the real range. Thus, depending
+              on what resistance the variable resistor was set to, I could expect to read voltages
+              between 1.13V and 2.15V.
+              <br>
+              <br>
+              I then checked to see how much current was going from power to ground to confirm 10k was
+              the right resistor. 5V = I * (10k + 13.3k). I = .21mA, so the amount of current from
+              power to ground is not that much.
+              <br>
+              <br>
+              This assignment was really difficult to me, as it took me a long time to understand
+              the voltage divide. Additionally, I struggled to understand how to find the V(out)'s
+              because I didn't realize you would use a multimeter to calculate the R(1) resistance.
+              Nadya, Jasper, and Lia have been great sounding boards and have been extremely helpful
+              in undestanding.
+            </figcaption>
+          </figure>
+          <figure>
+            <video src="A3_InputOutput/video.mp4" alt="animation" width= "450" controls muted class="space">
+              Your browser does not support the video tag.
+            </video>
+            <figcaption>
+              This is my circuit in action, with one full rotation from warm to moderate to cold and
+              back again. Once the circuit begins, the LED lights up with a color that corresponds to
+              the temperature of the room. If the room is warm, the LED is orange. If the room is
+              moderate, the LED is teal. If the room is cold, the LED is pink. I used an ice cube
+              (hidden in a paper towel because it was cold to handle) to get the thermistor to change
+              its reading.
+            </figcaption>
+          </figure>
+        </section>
+      </main>
+      <footer>
+        <hr>
+        <p id="footer">
+          HCDE 439, Winter 2020
+          <br>
+          Kay Waller
+          <br>
+          University of Washington
+        </p>
+      </footer>
+    </body>
+</html>
