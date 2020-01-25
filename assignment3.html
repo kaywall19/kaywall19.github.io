@@ -151,7 +151,7 @@
               between 0 and 30. Normally, the map function would map values to 0-225 and the values
               would be used in analogWrite. However, I chose to use the map function differently than
               it's original intent. I mapped to 30 because it was easily divisible by 3. The following
-              if and if-else branches divide the map values into 3 colors. If the mapped values ie
+              if and if-else branches divide the map values into 3 colors. If the mapped values is
               under 10, the LED turns pink. This is the coldest value. If the mapped value is between
               10 and 20, the color value is teal (this is moderate temparature). Lastly, if the
               mapped value is coming from a room temp thermistor, it will be 20-30 and turn the LED
@@ -184,14 +184,14 @@
               said the max resistance was 277.2k ohms (coldest temperature), and the least resistance was
               61.9 ohms (warmest temperature). However, I could not reasonably achieve these conditions,
               so I measured with a multimeter the themistor at base state (in my house) for the
-              warmest condition, and touching an ice cube for the coldest condition. I measured
+              warmest condition, and touched an ice cube for the coldest condition. I measured
               13.3k ohm resistance for the warmest condition, and 34.4k ohm resistance for the
               coldest condition. I also knew that V(in) was 5V.
               <br>
               <br>
               Based on these values, I used the equation V(out) = (R(2) / R(1) + R(2)) * 5 to
               determine my V(out). I plugged in 100, 220, 2k, and 10k values for R(2), and used both
-              13.3k and 34.4k as my R(1)'s. Once I had done my calcuations, I compared the the
+              13.3k and 34.4k as my R(1)'s. Once I had done my calcuations, I compared the
               different V(out) values for each resistance (min and max) at each R(2) amount against
               each other. I found that a 10k resistor created the largest V(out) difference, and thus
               the biggest voltage divide. The 100 ohm resistor gave a voltage difference of .023, the
@@ -212,7 +212,7 @@
               <br>
               This assignment was really difficult to me, as it took me a long time to understand
               the voltage divide. Additionally, I struggled to understand how to find the V(out)'s
-              because I didn't realize you would use a multimeter to calculate the R(1) resistance.
+              because I didn't realize you could use a multimeter to calculate the R(1) resistance.
               Nadya, Jasper, and Lia have been great sounding boards and have been extremely helpful
               in undestanding.
             </figcaption>
