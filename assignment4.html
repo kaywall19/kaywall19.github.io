@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+        <title>Documentation | Kay Waller</title>
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Assistant:300,400,600,700,800&display=swap" rel="stylesheet">
+    </head>
+    <body>
+      <div class= "title" id ="assignment-profile">
+        <h1>Documentation</h1>
+        <h2>A4: High(er) Voltage and Transistors!</h2>
+        <h4>Kay Waller</h4>
+      </div>
+      <main>
+        <h5>00: Overview</h5>
+        <p id="overview">
+          This assignment requires us to use a transistor to control some output device with a higher
+          load. To do this, we will separate load power from logic power, and use a sensor with
+          inputs to control the transistor. I used an IR sensor with a remote to control an LED strip.
+        </p>
+        <h5>01: Schematic</h5>
+        <section id= "schematic">
+          <figure>
+            <img src="A4_Transistors/schematic.jpg" alt="schematic"/>
+            <figcaption>
+              This is the schematic of my circuit. I have a larger power source (12V) that is
+              connected to the load, which in this case is an LED strip. I used a N-MOSFET transistor,
+              so the transistor comes after the load in both the schematic and circuit. The D
+              transistor pin is connected to the load, and then goes through the S pin to ground.
+              Pin G is the output pin that goes to pin 10 in which I can write values to the transistor.
+              The second half of my schematic is my IR sensor. The sensor is powered by 5V connected
+              to the sensor Y pin. The current continues to ground through sensor pin G, and is read as
+              an input through the sensor pin R which is connected to pin 6 on the arduino.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>02: Arduino Code</h5>
+        <section id= "code">
+          <figure>
+            <pre><code>
+              // import an arduino library for the IR remote functionality
+              #include <IRremote.h>
+
+              // declare arduino pin 6 as the pin connected to the sensor
+              const int sensor_pin = 6;
+              // declare arduino pin 10 as the pin connected to the transistor
+              const int transistor_pin = 10;
+
+              // instantiates an object of type irrecv
+              IRrecv irrecv(sensor_pin);
+              // creating a variable of type decode_results to store the sensor input
+              decode_results results;
+
+
+              // the setup function runs once the reset is pressed or the board is powered
+              void setup(){
+
+                // sets the speed of serial monitor --> Arduino communication to 9600 bits per second
+                Serial.begin(9600);
+                // use the properties of the irrecv object to enable the IR sensor and begin receiving process
+                irrecv.enableIRIn();
+                // Tells the light on the arduino to blink if the receiver gets a signal
+                irrecv.blink13(true);
+                // initializes the transistor pin as output
+                pinMode(transistor_pin, OUTPUT);
+
+              }
+
+              // the loop function runs continously
+              void loop(){
+
+                // tries to receive an IR code. If no code is received, the expression returns false. If a code
+                // is received, the expression returns true and the code is stored in results.
+                if (irrecv.decode(&results)){
+
+                  // checks to see if the results hex is equal to the hex that corresponds with the vol + button
+                  if (results.value == 0xFF629D) {
+
+                    // prints the button to the screen for easy debugging
+                    Serial.println("+");
+
+                    // begins a slow brightening of the LED strip
+                    for (int i = 0; i < 256; i += 5) {
+                      // writes the current value of i to the transistor pin
+                      analogWrite(transistor_pin, i);
+                      // delay 20ms to observe change
+                      delay(20);
+                      // prints i so you can see the LED increase brightness along with i
+                      Serial.println(i);
+                    }
+
+                  }
+
+                  // checks to see if the results hex is equal to the hex that corresponds with the vol - button
+                  if (results.value == 0xFFA857) {
+
+                    // prints the button to the screen for easy debugging
+                    Serial.println("-");
+
+                    // begins a slow dimming of the LED strip
+                    for (int i = 255; i >= 0; i -= 5) {
+                      // writes the current value of i to the transistor pin
+                      analogWrite(transistor_pin, i);
+                      // delay 20ms to observe change
+                      delay(20);
+                      // prints i so you can see the LED dim along with i
+                      Serial.println(i);
+                    }
+
+                  }
+
+                  // resets the receiver so it can read another code
+                  irrecv.resume();
+                }
+              }
+            <pre><code>
+            <figcaption id= "code-caption">
+              The code begins by importing the IRremote library so we can make use of extra functionality
+              for our sensor and remote. It then creates some variables to store the input and output
+              pins from the sensor and transistor, respectively. It then instantiates an irrecv object
+              which will be responsible for collecting the results from the IR remote. It creates
+              a decode_results variable as defined in the object to store the data from the sensor.
+              The setup() function starts communication with the Arduino serial monitor at 9600
+              bits per second, enables the irrecv object to start listening for button presses on the
+              remote, and tells the arduino built in LED to blink when a signal is recieved. I did
+              this to make debugging easier. Even if something wasn't showing up on my serial monitor,
+              I knew the button was being pressed because the built in LED blinked. Lastly, the setup()
+              function initializes the transistor pin as output so I can open up the voltage gate.
+
+              The loop() function continously runs, and listens for a code from the IR sensor to
+              do certain activities. It begins by checking if a signal was received from the sensor.
+              If there was no signal, the object resets and begins listening again. If there was
+              a signal, the result is stored in a variable. The code then checks to see if the result
+              from the sensor equals one of two buttons on the remote. If the code means the vol +
+              button was pressed, then the code makes the LED strip begin brightening slowly by
+              using a for loop and analogWriting the value of i to the transistor pin. It also
+              prints out a "+" and i for easy debugging. The opposite happens if the sensor detects
+              a vol - button push. The LED's begin to dim slowly, the serial monitor prints out a
+              "-" and i, and the value of i is analogWritten to the transistor pin. Both if cases
+              have a delay of 20ms in between each for loop interation so the user can observe the
+              brightness/dimness changing and it doesn't go too fast. At the end of every cycle through
+              the loop, the irrecv object resets so it can listen for the next signal.
+
+              Even though the transistor we used was an all-or-nothing transistor (meaning it either
+              opened the gate fully or closed it fully), I was still able to use analogWrite because
+              analogWrite values are just different duty cycles that turn the LED strip on and off
+              for certain ratios of time. analogWrite still uses all-or-nothing functionality, just
+              at faster increments called duty cycles that create a dimming effect.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>03: System Media</h5>
+        <section id= "video">
+          <figure>
+            <img src="A4_Transistors/circuit.jpg" alt="circuit pic" class="space2"/>
+            <figcaption>
+              This is my circuit, complete with one IR sensor, one transistor, one LED strip, and
+              connections to various input/output pins, power, and ground.
+              <br>
+              <br>
+              For the LED strip circuit, the voltage begins at 12V. The current travels through the
+              LED strip, and uses up 10.8V of voltage during the voltage drop. This is because the
+              LED strip has three LED's in series, and then a bunch of those segments in parallel.
+              Since voltage is the same for parallel circuits, the only voltage drop that matters is
+              because of the three LED's in series. Because they are white LED's, they each use up
+              3.6V. 12V - 3.6V * 3 = 1.2V.
+              <br>
+              <br>
+              I wanted to ensure I wasn't drawing more current than the transistor could handle.
+              I first calculated V=IR for each segment of the LED strip. With a voltage drop of 10.8V
+              mentioned above, and a resistance of 181 ohms marked on the LED strip, my equation was
+              1.2V = I * 181ohms. This led to I = 6.6mA of current for each segment on the LED strip.
+              From the documentation on the box, I saw that there were 300 LED's. Divided by three
+              per strip, that means there's 100 segments. I multiplied 6.6mA by 100 to find the total
+              current of the circuit, because current adds in parallel. I found that the total
+              current the LED strip was drawing was .66A, much smaller than the 32A current the
+              transistor could support.
+              <br>
+              <br>
+              I double checked my calculation by arriving to the answer a different way. I did V=IR
+              for the whole circuit. If 1.2V was the total voltage, I needed the total resistance.
+              I did (1/R(total)) = (1/R(1)) * 100 segments. This led to a total resistance of 1.81 ohms.
+              From there, I did 1.2V = I * 1.81ohms and found I = .66A. This confirmed my earlier
+              calculation so I knew I was okay to use that transistor with that LED strip. I talked
+              through this calculations with Lily and Lia to make sure we were all on the same page.
+              <br>
+              <br>
+              The other half of my circuit is my sensor.
+            </figcaption>
+          </figure>
+          <figure>
+            <video src="A4_Transistors/video.mp4" alt="animation" width= "700" controls muted class="space">
+            </video>
+            <figcaption>
+              This is my circuit in action. The LED strip starts off, and then by pressing the volume
+              + button on the remote, it raises the brightness of the lights gradually until they area
+              all the way on. When I press the volume - button the LED strip dims slowly until it
+              turns off. The included video has two sets of brightening and dimming.
+            </figcaption>
+          </figure>
+        </section>
+      </main>
+      <footer>
+        <hr>
+        <p id="footer">
+          HCDE 439, Winter 2020
+          <br>
+          Kay Waller
+          <br>
+          University of Washington
+        </p>
+      </footer>
+    </body>
+</html>
