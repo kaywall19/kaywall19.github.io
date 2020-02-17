@@ -128,6 +128,9 @@
               this to make debugging easier. Even if something wasn't showing up on my serial monitor,
               I knew the button was being pressed because the built in LED blinked. Lastly, the setup()
               function initializes the transistor pin as output so I can open up the voltage gate.
+              pinMode uses LOW as a default, so when I initialized the transistor pin using pinMode
+              and set it to output, it is initially set to LOW because of the default behavior of
+              pinMode. This means the transistor "switch" is closed and no voltage is passing through.
 
               The loop() function continously runs, and listens for a code from the IR sensor to
               do certain activities. It begins by checking if a signal was received from the sensor.
@@ -161,33 +164,28 @@
               <br>
               <br>
               For the LED strip circuit, the voltage begins at 12V. The current travels through the
-              LED strip, and uses up 10.8V of voltage during the voltage drop. This is because the
+              LED strip, and uses up approximately 9.6V during the voltage drop. This is because the
               LED strip has three LED's in series, and then a bunch of those segments in parallel.
               Since voltage is the same for parallel circuits, the only voltage drop that matters is
-              because of the three LED's in series. Because they are white LED's, they each use up
-              3.6V. 12V - 3.6V * 3 = 1.2V.
+              because of the three LED's in series. The estimated voltage drop is 9.6V because white
+              LED's typically take up 3.2V, but the exact voltage drop of the LED strip is unknown
+              because it doesn't say it in the documentation.
               <br>
               <br>
               I wanted to ensure I wasn't drawing more current than the transistor could handle.
-              I first calculated V=IR for each segment of the LED strip. With a voltage drop of 10.8V
-              mentioned above, and a resistance of 181 ohms marked on the LED strip, my equation was
-              1.2V = I * 181ohms. This led to I = 6.6mA of current for each segment on the LED strip.
-              From the documentation on the box, I saw that there were 300 LED's. Divided by three
-              per strip, that means there's 100 segments. I multiplied 6.6mA by 100 to find the total
-              current of the circuit, because current adds in parallel. I found that the total
-              current the LED strip was drawing was .66A, much smaller than the 32A current the
-              transistor could support.
+              I used the equation P = V * I to determine how much current my LED strip would draw.
+              The LED strip is 18W and uses 12V. Using 18W = 12V * I, I got 1.5A = I. This is way
+              under the 32A that the transistor can support, so I knew I wasn't sending too much
+              current through the transistor. I talked through these calculations with Lia and Lily
+              to make sure P = V * I matched up with our V = I * R conceptual understanding. With
+              some clarification from Nadya, we were all on the same page.
               <br>
               <br>
-              I double checked my calculation by arriving to the answer a different way. I did V=IR
-              for the whole circuit. If 1.2V was the total voltage, I needed the total resistance.
-              I did (1/R(total)) = (1/R(1)) * 100 segments. This led to a total resistance of 1.81 ohms.
-              From there, I did 1.2V = I * 1.81ohms and found I = .66A. This confirmed my earlier
-              calculation so I knew I was okay to use that transistor with that LED strip. I talked
-              through this calculations with Lily and Lia to make sure we were all on the same page.
-              <br>
-              <br>
-              The other half of my circuit is my sensor.
+              The other half of my circuit is my sensor. The sensor has an internal resistor, so I
+              could wire power to ground without needing a fixed resistor in the breadboard. The
+              current flows from power, to the sensor, and then to ground. There is an input pin
+              connected to the sensor to read the IR signals made by the remote and allow my code
+              to use those values.
             </figcaption>
           </figure>
           <figure>
