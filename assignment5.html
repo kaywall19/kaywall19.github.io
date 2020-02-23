@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+        <title>Documentation | Kay Waller</title>
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Assistant:300,400,600,700,800&display=swap" rel="stylesheet">
+    </head>
+    <body>
+      <div class= "title" id ="assignment-profile">
+        <h1>Documentation</h1>
+        <h2>A5: Talking to the Web!</h2>
+        <h4>Kay Waller</h4>
+      </div>
+      <main>
+        <h5>00: Overview</h5>
+        <p id="overview">
+          This assignment requires us to use two sensors and interact with the information coming
+          from the arduino over serial. I chose a button and a thermistor as my two sensors, and
+          the interactivity is changing colors based on temperature or button press.
+        </p>
+        <h5>01: Schematic</h5>
+        <section id= "schematic">
+          <figure>
+            <img src="A5_Web/schematic.jpg" alt="schematic"/>
+            <figcaption>
+              This is my schematic. Both the button and the thermistor are connected to the same 5V
+              pin from the arduino. 5V goes to the button, and when the switch is pressed down, flows
+              through a 220 ohm resistor and then to ground. During this travel an input pin connected
+              to arduino pin 2 uses digitalRead() to measure the state of the button. The transistor
+              has a similar circuit. Power flows through the transistor to the second 10k resistor,
+              and then to ground. This creates a voltage divide, which turns changes in resistance
+              into a change in voltage which analogRead() can read. This input pin is connected to
+              A0 in the arduino.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>02: Arduino Code</h5>
+        <section id= "code">
+          <figure>
+            <pre><code>
+              //associate the button with pin 2
+              const int button = 2;
+              //associate the thermistor sensor with analog input pin A0
+              const int therm = A0;
+
+              //the setup function runs once the reset is pressed or the board is powered
+              void setup() {
+
+                //sets the speed of Arduino communication to 9600
+                Serial.begin(9600);
+                //initializes the button pin as INPUT so I can read in the values
+                pinMode(button, INPUT);
+                //initializes the thermistor pin as INPUT so I can read in the values
+                pinMode(therm, INPUT);
+
+              }
+
+              //the loop function runs continously
+              void loop() {
+
+                //reads in the state of the button (1 if pressed, 0 if not)
+                boolean buttonState = digitalRead(button);
+                //reads in the value of the thermistor sensor
+                int thermValue = analogRead(therm);
+
+                //prints the state of the button to the screen as part of the tuple
+                Serial.print(buttonState);
+                //a space in between two values makes a tuple
+                Serial.print(" ");
+                //prints the thermistor value to complete the tuple of value pairs
+                Serial.println(thermValue);
+
+                //wait 200ms before reading next press or value
+                delay(200);
+              }
+            <pre><code>
+            <figcaption id= "code-caption">
+              The arduino code is relatively simple. The pins are assigned to a more helpful variable
+              name, and then both are initialized so I can read in the button presses and the
+              temperature. I am sending information over serial to my p5.js, so I set the serial
+              communication speed at 9600. In the loop, I read in both of the values and print them
+              to the serial in a tuple pair. There is a 200ms delay in between the sensor and button
+              readings.
+
+              When reading in the button, I was expecting to receive either a 1 or a 0, letting me
+              know whether or not the button was pressed. The thermistor is analogRead(), which means
+              I am given a range of values. Based on current conditions in my house and my experience
+              with using the thermistor in assignment 3, I expected to see analogRead() values range
+              in between 400 and 700. This is about in the middle of the 0-1023 range which
+              analogRead() provides. This makes sense, because my warm and cold conditions were only
+              a fraction of the range the thermistor can read.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>03: p5.js Code</h5>
+        <section id= "code">
+          <figure>
+            <pre><code>
+              /** This code borrows heavily from the "Loop" example on the p5.js website. It uses
+              the idea of a moving line to create an animation. I understand the code below, and
+              all the sensor work and interactivity is mine. This code also borrows heavily from
+              the HCDE 439 example 2 package, where the basics of the serial communication were
+              set up for us.
+              **/
+
+              var serial; // variable to hold an instance of the serialport library
+              var portName = 'COM4' // name of my port
+              var button; // variable to hold the state of the button
+              var therm; // variable to hold the thermistor sensor value
+              let position = 100; // initializes the starting position of the line to be at 100
+
+
+              function setup() {
+                serial = new p5.SerialPort(); // make a new instance of the serialport library
+                serial.on('list', printList); // set a callback function for the serialport list event
+                serial.on('connected', serverConnected); // callback for connecting to the server
+                serial.on('open', portOpen); // callback for the port opening
+                serial.on('data', serialEvent); // callback for when new data arrives
+                serial.on('error', serialError); // callback for errors
+                serial.on('close', portClose); // callback for the port closing
+
+                serial.list(); // list the serial ports
+                serial.open(portName); // open a serial port
+                createCanvas(1200, 800); // creates a canvas of the specified size
+                background("#232126"); // sets the background color of the canvas to the hex
+                frameRate(30); // sets the rate at which the frame resets
+              }
+
+              // get the list of ports:
+              function printList(portList) {
+               // portList is an array of serial port names
+               for (var i = 0; i < portList.length; i++) {
+               // Display the list the console:
+                 print(i + " " + portList[i]);
+               }
+              }
+
+              // method used for debugging purposes
+              function serverConnected() {
+                // prints out success message
+                print('connected to server.');
+              }
+
+              // method used for debugging purposes
+              function portOpen() {
+                // prints out success message
+                print('the serial port opened.')
+              }
+
+              // method used for debugging purposes
+              function serialError(err) {
+                // prints out error message and the code
+                print('Something went wrong with the serial port. ' + err);
+              }
+
+              // method used for debugging purposes
+              function portClose() {
+                // prints out exiting message
+                print('The serial port closed.');
+              }
+
+              // method reads in serial and extracts button and thermistor values into variables
+              function serialEvent() {
+                if (serial.available()) { // if there is any data to read
+                  var datastring = serial.readLine(); // read in the data from the serial
+                  try { // do this code as long as there's no errors
+                    button = datastring.substring(0,1); // isolate the first part of the tuple for the button
+                    therm = datastring.substring(2); // isolate the second part of the tuple for the thermistor
+                  } catch(err) { // catch the error if there is one
+                    console.log(err); // console log the error to the screen for easy debugging
+                  }
+                }
+              }
+
+              // function is looped over and handles the animations and interactivity on the screen
+              function draw() {
+                if (button == 1) { // if the button is pressed
+                  background("#7FB3AC"); // change the background to the lighter hex
+                } else { // if the button is not pressed
+                  background("#19888C"); // change the background to the darker hex
+                }
+                if (therm < 600) { // if the thermistor value is under 600
+                  stroke("#FF7D47"); // change the line stroke to orange
+                } else { // if the thermistor value is over 600
+                  stroke("#29454D"); // change the line stroke to blue-gray.
+                }
+                strokeWeight(6); // set the stroke weight to thicker than default so you can see the line
+                position = position - 1; // decrement the position so the line appears to be moving up
+                if (position < 0) { // if the position is out of the screen
+                  position = height; // start back over again
+                }
+                line(0, position, width, position); // draw the line
+              }
+            <pre><code>
+            <figcaption id= "code-caption">
+            As listed above, I drew inspiration from the Loop example on the p5.js website. The code
+            begins by initializing a lot of variables needed for the serial communication and the
+            interactivity. The setup() function is where the serial communication gets set up.
+            Callbacks are made to the serial instance so the serial is ready to open, receive data,
+            check for errors, and close. The functions below are used for debugging and ensuring the
+            connection between the port and server are functioning properly. The function serialEvent()
+            begins the actual processing by reading in the values from the serial monitor and
+            separating them out of the tuple into their respective variables. If any errors arise
+            during this process, there is a catch to handle them. The function draw() is looped over
+            on itself, and it's this method that draws the moving line and changes the colors based
+            on interactivity. If the button is actively being pressed, the screen changes to a
+            lighter blue. When the button is released, the screen returns to its normal color. As the
+            line continues on its moving path, it can be either blue-gray or orange, depending on
+            the temperature. The stroke weight is set so the line actually shows up, the position
+            is decremented to make it look like the line is moving, and then the line is actually
+            drawn. Lia and Lily were helpful in trying to understand the serial communication part
+            of the code.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>04: System Media</h5>
+        <section id= "video">
+          <figure>
+            <img src="A5_Web/circuit.jpg" alt="circuit pic" class="rotate"/>
+            <figcaption>
+              This is my circuit, complete with one button, one transistor, and various wires going
+              to inputs, power, and ground.
+              <br>
+              <br>
+              Since I decided to use the thermistor, I needed to determine the correct amount for
+              the fixed resistor. To do this, I first found the maximum and minimum resistance for
+              the conditions at my house. The warmest condition was room temperature, and for the
+              coldest condition I touched an ice cube to it. I measured 13.3k ohm resistance for the
+              warmest condition, and 34.4k ohm resistance for the coldest condition. I also knew that
+              V(in) was 5V.
+              <br>
+              <br>
+              Based on these values, I used the equation V(out) = (R(2) / R(1) + R(2)) * 5 to
+              determine my V(out). I plugged in various R(2) values in the hopes of finding a V(out)
+              difference using the max and min resistance of R(1) that was large. A large voltage
+              divide is important because I wanted my interactivity to showcase a variety of values.
+              I found that a 10k resistor created the largest V(out) difference, and thus the biggest
+              voltage divide. Thus, depending on what resistance the variable resistor was set to, I
+              could expect to read voltages between 1.13V and 2.15V.
+              <br>
+              <br>
+              Next up was determining a resistor to use for the button. The button has a 5V voltage
+              drop and has a maximum allowable current of 40 ohms. I used 30 ohms in my calculation
+              so as to not exceed the maximum. This means 5V = 30mA * R, so 5V = .03A * R. R therefore
+              equals 166 ohms. Although not exactly 166, I used the 220 ohm resistor because I felt it
+              was safer to supply less current than accidentally go over the maximum.
+            </figcaption>
+          </figure>
+          <figure>
+            <video src="A5_Web/video.mp4" alt="animation" width= "600" controls muted class="space">
+            </video>
+            <figcaption>
+              This is my code in action. When the button is pressed, the color on the web page changes
+              slightly. It's hard to see on the video, but the color change is much clearer in person.
+              When the thermistor is reading relatively warm values for its range, the line moving
+              is orange. When it is reading cooler values for its range, the color changes to a
+              blue gray.
+            </figcaption>
+          </figure>
+        </section>
+      </main>
+      <footer>
+        <hr>
+        <p id="footer">
+          HCDE 439, Winter 2020
+          <br>
+          Kay Waller
+          <br>
+          University of Washington
+        </p>
+      </footer>
+    </body>
+</html>
