@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+        <title>Documentation | Kay Waller</title>
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Assistant:300,400,600,700,800&display=swap" rel="stylesheet">
+    </head>
+    <body>
+      <div class= "title" id ="assignment-profile">
+        <h1>Documentation</h1>
+        <h2>A5: The Web Talks Back!</h2>
+        <h4>Kay Waller</h4>
+      </div>
+      <main>
+        <h5>00: Overview</h5>
+        <p id="overview">
+          This assignment creates an interactive website with p5.js that talks to the arduino. Using
+          JSON parsing, Serial, and p5.js, this assignment uses two sensors to change the webpage,
+          and a button on the webpage causes an LED wired to the arduino to turn on.
+        </p>
+        <h5>01: Schematic</h5>
+        <section id= "schematic">
+          <figure>
+            <img src="A6_Web2/schematic.jpg" alt="schematic"/>
+            <figcaption>
+              The schematic for this circuit is very similar to my schematic for the last assignment.
+              It uses the same sensors as assignment 5, the thermistor and the button (which is
+              being counted as a sensor for this assignment). The thermistor gets 5V, and then creates
+              a voltage divide with a 10k resistor. The current flows to ground, and the input pin
+              A0 measures the resistance-turned-voltage value from the voltage divide. The button
+              also gets 5V, has a 220 ohm resistor, travels to ground, and is read by a wire connecting
+              to input pin 2. The new addition from assignment 5 is the white LED, which is connected
+              to pin 13. It has a 100 ohm resistor and then travels through the LED to ground.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>02: Arduino Code</h5>
+        <section id= "code">
+          <figure>
+            <pre><code>
+              //associate the button with pin 2
+              const int button = 2;
+              //associate the thermistor sensor with analog input pin A0
+              const int therm = A0;
+              //associate the LED with digital output pin 13
+              const int LED = 13;
+
+              //the setup function runs once the reset is pressed or the board is powered
+              void setup() {
+
+                //sets the speed of Arduino communication to 9600
+                Serial.begin(9600);
+                //initializes the button pin as INPUT so I can read in the values
+                pinMode(button, INPUT);
+                //initializes the thermistor pin as INPUT so I can read in the values
+                pinMode(therm, INPUT);
+                //initializes the LED as output so I can make it turn on and off
+                pinMode(LED, OUTPUT);
+
+              }
+
+              //the loop function runs continously
+              void loop() {
+
+                //reads in the state of the button (1 if pressed, 0 if not)
+                boolean buttonState = digitalRead(button);
+                //reads in the value of the thermistor sensor
+                int thermValue = analogRead(therm);
+
+                //if there's serial data
+                if (Serial.available() > 0) {
+
+                  //read in the written serial data into variable
+                  int inByte = Serial.read();
+                  //print the variable to the monitor for easy debugging and confirmation
+                  Serial.print(inByte);
+                  //if the read value is 49
+                  //49 is "1" in ASCII and means the button is pressed
+                  if (inByte == 49) {
+                    //turns on the white LED
+                    digitalWrite(LED, HIGH);
+                  //if the read value is 48
+                  //49 is "0" in ASCII and means the button is not pressed
+                  } else if (inByte == 48) {
+                    //turns off the white LED
+                    digitalWrite(LED, LOW);
+                  }
+
+               }
+
+                //prints the start of the array for the tuple
+                Serial.print("[");
+                //prints the state of the button to the screen as part of the tuple
+                Serial.print(buttonState);
+                //a space in between two values makes a tuple
+                Serial.print(",");
+                //prints the thermistor value to complete the tuple of value pairs
+                Serial.print(thermValue);
+                //prints end of the array for the tuple
+                Serial.println("]");
+
+                //wait 200ms before reading next press or value
+                delay(200);
+              }
+            <pre><code>
+            <figcaption id= "code-caption">
+              The arduino code is relatively simple. The pins are assigned to a more helpful variable
+              name, and then both are initialized so I can read in the button presses and the
+              temperature. A third pin is also initialized for writing to the white LED output. I am
+              sending information over serial to my p5.js, so I set the serial communication speed at
+              9600. In the loop, I read in both of the values and print them to the serial in a
+              tuple pair. There is a 200ms delay in between the sensor and button readings. However,
+              my the web also talks back to my arduino, and the communication exists both ways.
+              Before sending the sensor values to the monitor, the code checks if there's any serial
+              data available that was sent from my p5.js code. If there is data available it is read
+              in. The value is either a 49 or 48 (the ASCII equivalent of 0 or 1) and represents
+              whether the opposite of the current state of the button. For instance, if the LED is on,
+              then the read Serial will be 1, which means the LED will be turned on. If the LED is
+              currently off, the read serial will be 0 and the LED will be turned off based on the
+              arduino code. Basically, clicking on the button on the webpage will toggle the LED
+              on and off.
+
+
+              When reading in the button, I was expecting to receive either a 1 or a 0, letting me
+              know whether or not the button was pressed. The thermistor is analogRead(), which means
+              I am given a range of values. Based on current conditions in my house and my experience
+              with using the thermistor in assignment 3, I expected to see analogRead() values range
+              in between 400 and 700. This is about in the middle of the 0-1023 range which
+              analogRead() provides. This makes sense, because my warm and cold conditions were only
+              a fraction of the range the thermistor can read.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>03: p5.js Code</h5>
+        <section id= "code">
+          <figure>
+            <pre><code>
+              /** This code borrows heavily from the "Loop" example on the p5.js website. It uses
+              the idea of a moving line to create an animation. I understand the code below, and
+              all the sensor work and interactivity is mine. This code also borrows heavily from
+              the HCDE 439 example 2 package, where the basics of the serial communication were
+              set up for us.
+              **/
+
+              var serial; // variable to hold an instance of the serialport library
+              var portName = 'COM4' // name of my port
+              var dataarray = []; // some data coming in over serial!
+              var button; // variable to hold the state of the button
+              var therm; // variable to hold the thermistor sensor value
+              let position = 100; // initializes the starting position of the line to be at 100
+              var newarray; // container for the JSON parsed serial
+              var buttonState = 0; // variable to keep track of toggling the arduino white LED
+
+              // code runs once during setup
+              function setup() {
+                serial = new p5.SerialPort(); // make a new instance of the serialport library
+                serial.on('list', printList); // set a callback function for the serialport list event
+                serial.on('connected', serverConnected); // callback for connecting to the server
+                serial.on('open', portOpen); // callback for the port opening
+                serial.on('data', serialEvent); // callback for when new data arrives
+                serial.on('error', serialError); // callback for errors
+                serial.on('close', portClose); // callback for the port closing
+
+                serial.list(); // list the serial ports
+                serial.open(portName); // open a serial port
+                createCanvas(1200, 800); // creates a canvas of the specified size
+                background("#232126"); // sets the background color of the canvas to the hex
+                frameRate(30); // sets the rate at which the frame resets
+
+                // adds an event listener to the button displayed on the webpage
+                document.getElementById("led").addEventListener("click", led);
+              }
+
+              // get the list of ports:
+              function printList(portList) {
+               // portList is an array of serial port names
+               for (var i = 0; i < portList.length; i++) {
+               // Display the list the console:
+                 print(i + " " + portList[i]);
+               }
+              }
+
+              // method used for debugging purposes
+              function serverConnected() {
+                // prints out success message
+                print('connected to server.');
+              }
+
+              // method used for debugging purposes
+              function portOpen() {
+                // prints out success message
+                print('the serial port opened.')
+              }
+
+              // method used for debugging purposes
+              function serialError(err) {
+                // prints out error message and the code
+                print('Something went wrong with the serial port. ' + err);
+              }
+
+              // method used for debugging purposes
+              function portClose() {
+                // prints out exiting message
+                print('The serial port closed.');
+              }
+
+              // method reads in serial and extracts button and thermistor values into variables
+              function serialEvent() {
+                if (serial.available()) { // if there is serial data
+                	var datastring = serial.readLine(); // read in the serial data by line
+                	var newarray; // create a variable for new array
+                	try {
+                  	  newarray = JSON.parse(datastring); // parse the serial to turn it into JSON data
+                  } catch(err) { // if there is an error
+                      	  console.log(err); // log the error to the console
+                	}
+                	if (typeof(newarray) == 'object') { // if the json data exists
+                  	  dataarray = newarray; // assign the array to the new array because the data is valid
+                	}
+                }
+              }
+
+              // function that sends serial data back to the arduino that changes the state of the LED
+              function led() {
+                if (buttonState > 1) { // if the buttonState variable is out of range (>1)
+                  buttonState = 0 // then set buttonState back to the beginning (0)
+                }
+                if (buttonState == 1) { // if buttonState = 1
+                  serial.write("1"); // then write 1 to the serial and send it back to the arduino
+                } else if (buttonState == 0) { // if buttonState = 0
+                  serial.write("0"); // then write 0 to the serial and send it back to the arduino
+                }
+                // increment buttonState so it will create toggle appearance
+                buttonState++;
+              }
+
+              // function is looped over and handles the animations and interactivity on the screen
+              function draw() {
+                if (dataarray[0] == 1) { // if the button is pressed
+                  background("#7FB3AC"); // change the background to the lighter hex
+                } else { // if the button is not pressed
+                  background("#19888C"); // change the background to the darker hex
+                }
+                if (dataarray[1] < 600) { // if the thermistor value is under 600
+                  stroke("#FF7D47"); // change the line stroke to orange
+                } else { // if the thermistor value is over 600
+                  stroke("#29454D"); // change the line stroke to blue-gray.
+                }
+                strokeWeight(6); // set the stroke weight to thicker than default so you can see the line
+                position = position - 1; // decrement the position so the line appears to be moving up
+                if (position < 0) { // if the position is out of the screen
+                  position = height; // start back over again
+                }
+                line(0, position, width, position); // draw the line
+              }
+            <pre><code>
+            <figcaption id= "code-caption">
+              As listed above, I drew inspiration from the Loop example on the p5.js website. The code
+              begins by initializing a lot of variables needed for the serial communication and the
+              interactivity. The setup() function is where the serial communication gets set up.
+              Callbacks are made to the serial instance so the serial is ready to open, receive data,
+              check for errors, and close. The functions below are used for debugging and ensuring the
+              connection between the port and server are functioning properly. The function serialEvent()
+              begins the actual processing by reading in the values from the serial monitor and
+              separating them out of the tuple into their respective variables. If any errors arise
+              during this process, there is a catch to handle them. It also adds an event listener
+              to the button in the HTML. The button is listening for a click, and whenever the button
+              is clicked it calls the led() function. The led() function is in charge of toggling
+              the state of the white LED in the arduino. For every button press on the webpage, if
+              the LED is off, the code tells the arduino to turn it on.  If the LED is on, then then a
+              button press on the website will turn it off. The function draw() is looped over
+              on itself, and it's this method that draws the moving line and changes the colors based
+              on interactivity. If the button is actively being pressed, the screen changes to a
+              lighter blue. When the button is released, the screen returns to its normal color. As the
+              line continues on its moving path, it can be either blue-gray or orange, depending on
+              the temperature. The stroke weight is set so the line actually shows up, the position
+              is decremented to make it look like the line is moving, and then the line is actually
+              drawn. Lia and Lily were helpful in trying to understand the serial communication part
+              of the code.
+            </figcaption>
+          </figure>
+        </section>
+        <h5>04: System Media</h5>
+        <section id= "video">
+          <figure>
+            <img src="A6_Web2/circuit.jpg" alt="circuit pic" class="space2"/>
+            <figcaption>
+              This is my circuit, complete with one button, one transistor, one white LED, and various
+              wires going to inputs, power, and ground.
+              <br>
+              <br>
+              Since I decided to use the thermistor, I needed to determine the correct amount for
+              the fixed resistor. To do this, I first found the maximum and minimum resistance for
+              the conditions at my house. The warmest condition was room temperature, and for the
+              coldest condition I touched an ice cube to it. I measured 13.3k ohm resistance for the
+              warmest condition, and 34.4k ohm resistance for the coldest condition. I also knew that
+              V(in) was 5V.
+              <br>
+              <br>
+              Based on these values, I used the equation V(out) = (R(2) / R(1) + R(2)) * 5 to
+              determine my V(out). I plugged in various R(2) values in the hopes of finding a V(out)
+              difference using the max and min resistance of R(1) that was large. A large voltage
+              divide is important because I wanted my interactivity to showcase a variety of values.
+              I found that a 10k resistor created the largest V(out) difference, and thus the biggest
+              voltage divide. Thus, depending on what resistance the variable resistor was set to, I
+              could expect to read voltages between 1.13V and 2.15V.
+              <br>
+              <br>
+              Next up was determining a resistor to use for the button. The button has a 5V voltage
+              drop and has a maximum allowable current of 40 ohms. I used 30 ohms in my calculation
+              so as to not exceed the maximum. This means 5V = 30mA * R, so 5V = .03A * R. R therefore
+              equals 166 ohms. Although not exactly 166, I used the 220 ohm resistor because I felt it
+              was safer to supply less current than accidentally go over the maximum.
+              <br>
+              <br>
+              The last step was determining the resistor to use for my white LED. The white LED has
+              a voltage drop of 3.3V, and a max current of 20mA. Using 5V - 3.3V = 20mA * R, I got
+              an R value of 85 ohms. This was close enough to my 100ohm resistor in the kit, and I
+              was guaranteed to not go over the maximum current.
+            </figcaption>
+          </figure>
+          <figure>
+            <video src="A6_Web2/video.mp4" alt="animation" width= "600" controls muted class="space">
+            </video>
+            <figcaption>
+              This is my code in action. When the button is pressed, the color on the web page changes
+              slightly. It's hard to see on the video, but the color change is much clearer in person.
+              Depending on the temperature of the thermistor, the moving line is either orange or
+              blue-gray. There is a button on the webpage, and when that button is clicked the
+              white LED on the arduino is toggled on or off.
+            </figcaption>
+          </figure>
+        </section>
+      </main>
+      <footer>
+        <hr>
+        <p id="footer">
+          HCDE 439, Winter 2020
+          <br>
+          Kay Waller
+          <br>
+          University of Washington
+        </p>
+      </footer>
+    </body>
+</html>
