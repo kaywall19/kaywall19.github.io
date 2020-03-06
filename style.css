@@ -143,7 +143,7 @@ p {
   margin: auto auto;
 }
 
-figcaption {
+figcaption, ul {
   font-size: 14px;
   font-family: "Assistant", sans-serif;
   width: 85%;
@@ -151,7 +151,10 @@ figcaption {
   margin: auto auto;
   margin-top: 3%;
   line-height: 22px;
+}
 
+ul {
+  text-align: left;
 }
 
 h5 {

@@ -16,11 +16,9 @@
       <main>
         <h5>00: Overview</h5>
         <p id="overview">
-          This is my final project documentation page. As I continue forming and implementing my idea,
-          this page will be updated. Check back here to see my progress in real time!
-          <br>
-          <br>
-          Brainstorming Ideas: completed 2/10/2020
+          Making an otter say facts about itself based on various touches by the user is my final
+          project. If you scratch the otter's belly, it will say a fact about otters. If you boop the
+          otter's nose, the otter will say a different fact.
         </p>
         <h5>01: Brainstorming Ideas</h5>
         <section id= "schematic">
@@ -46,10 +44,402 @@
               The third idea is a drum that emits different
               sounds based on the force that the surface is hit. If the drum is hit lightly, it would
               emit a higher pitch sound. If the drum is hit forcefully, it would emit a lower pitch
-              sound.
+              sound
+              <br>
+              <br>
+              Ultimately the idea I chose to do for my final project was animating a stuffed animal,
+              although I chose an otter instead of a lion. I wanted the otter to say facts about itself
+              because I'm in a wildlife conservation class that I found really interesting and
+              wanted to pass on some of the cool things I had learned and my appreciation for
+              wildlife. I'm framing my project as a prototype of a children's toy. 
             </figcaption>
           </figure>
         </section>
+        <h5>02: Bill of Materials</h5>
+        <section id= "materials">
+          <ul>
+            <li>10M ohm resistors (2)</li>
+            <li>2k ohm resistor (1)</li>
+            <li>1k ohm resistor (1)</li>
+            <li>Wires (18)</li>
+            <li>DFPlayerMini (1)</li>
+            <li>Arduino Uno (1) </li>
+            <li>Arduino cable (1)</li>
+            <li>Mini SD card (1)</li>
+            <li>Speaker for DFModule (1)</li>
+          </ul>
+        </section>
+        <h5>03: Schematic</h5>
+        <section id="schematic">
+          <figure>
+            <img src="final project/schematic.jpg" alt="schematic"/>
+            <figcaption>
+              The schematic for my final project is a bit more complicated than the past homework
+              assignments. There are two capacitive sensors, each connected to a send and receiving
+              pin. Each sensor has one, 10M ohm resistor so touch can be sensed through the otter's
+              thick fur. The two sensing wires go to the otter's belly and nose. The DFPlayerMini was
+              the most complicated to wire, but I followed the datasheets for the component so I
+              knew what to wire where. The VCC pin goes to 5V, the RX and TX pins go to arduino digital
+              input pins for communication with the arduino, and the fourth wire goes to the ground
+              arduino pin. There are two resistors that add up to 3K ohms between the arduino and the RX
+              pin that are used to drown out excess environmental noise. The last two wires going from the
+              DFPlayerMini go in and out of the speaker so the DFPlayerMini can talk to the speaker.
+              There is also a 100 ohm resistor directly between power and ground because my system
+              is connected to a battery bank that shuts off if there's not a constant draw of current,
+              even if it's small. I added the 100 ohm resistor to keep the battery bank on.
+            </figcaption>
+          </figure>
+      </section>
+      <h5>04: Code</h5>
+      <section id="code">
+        <figure>
+          <pre><code>
+            /*
+             * Kay Waller
+             * Final Project
+             * HCDE 439, Winter 2020
+             * 04 March 2020
+             *
+             * This project borrows from code examples by Paul Badger (for capacitive sensing),
+             * Angelo Qiao (for DFPlayerMini), and David Mellis (for smoothing the capacative
+             * sensing).
+             *
+             */
+
+
+            // THESE ARE LIBRARIES
+            // include the capacative sensor library
+            #include "CapacitiveSensor.h"
+            // include the arduino library
+            #include "Arduino.h"
+            // include the software serial library
+            #include "SoftwareSerial.h"
+            // include the DFPlayerMini (MP3 player) library
+            #include "DFRobotDFPlayerMini.h"
+            // END LIBRARIES
+
+
+            // THIS IS THE SMOOTHING CODE
+            // declaring value of int that determines amount the sensing values are smoothed
+            const int numReadings = 10;
+
+            // this section of code corresponds to the capacitive sensor in the otter's belly
+            // declare variable to store the readings from the sensor input as an array of the
+            // declared length
+            int readings_belly[numReadings];
+            // declare variable to keep track of the index of the current reading
+            int readIndex_belly = 0;
+            // declare variable to keep track of running total of inputs
+            int total_belly = 0;
+            // declare variable to store the average (smoothed) value of all readings
+            int average_belly = 0;
+
+            // this section of code corresponds to the capacitive sensor in the otter's nose
+            // declare variable to store the readings from the sensor input as an array of the
+            // declared length
+            int readings_nose[numReadings];
+            // declare variable to keep track of the index of the current reading
+            int readIndex_nose = 0;
+            // declare variable to keep track of running total of inputs
+            int total_nose = 0;
+            // declare variable to store the average (smoothed) value of all readings
+            int average_nose = 0;
+            // SMOOTHING CODE ENDS
+
+
+            // THIS IS CALIBRATING CODE
+            // sets the initial value for calibration for the belly
+            int calibrating_belly = 0;
+            // CALIBRATING CODE ENDS
+
+
+            // THIS IS DFPLAYERMINI CODE
+            // instantiates a SoftwareSerial object with RX, TX pins so the arduino can communicate
+            // with the component
+            SoftwareSerial mySoftwareSerial(10, 11);
+            // create a DFPlayer object to access properties later
+            DFRobotDFPlayerMini myDFPlayer;
+            // DFPLAYERMINI CODE ENDS
+
+
+            // THIS IS CAPACATIVE SENSING CODE
+            // creates a capacitive sensing object with pin 4 as the sensor pin, and 2 as the
+            // receiving
+            CapacitiveSensor belly = CapacitiveSensor(4,2);
+            // creates a capacitive sensing object with pin 6 as the sensor pin, and 8 as the
+            // receiving
+            CapacitiveSensor nose = CapacitiveSensor(6,8);
+            // CAPACITIVE SENSING CODE ENDS
+
+
+            // THIS IS BREAKPOINT CODE
+            // declares the variable to store the previous value of the sensor. Used for determining
+            // sound breakpoint
+            int previousVal_belly = 1000;
+            // declares the variable to store the previous value of the sensor. Used for determining
+            // sound breakpoint
+            int previousVal_nose = 1000;
+            // BREAKPOINT CODE ENDS
+
+            //the setup function runs once the reset is pressed or the board is powered
+            void setup() {
+
+              // sets the speed of Arduino --> DFPlayerMini communication to 9600
+              mySoftwareSerial.begin(9600);
+              // sets the speed of Arduino communication to 9600
+              Serial.begin(9600);
+
+              // prints status of DFPlayerMini for debugging purposes
+              Serial.println(F("DFRobot DFPlayer Mini Demo"));
+              // prints status of DFPlayerMini for debugging purposes
+              Serial.println(F("Initializing DFPlayer ... (May take 3~5 seconds)"));
+
+              // if there isn't communication with the DFPlayerMini
+              if (!myDFPlayer.begin(mySoftwareSerial)) {
+                // prints error message for debugging purposes
+                Serial.println(F("Unable to begin:"));
+                // prints helpful debugging message
+                Serial.println(F("1.Please recheck the connection!"));
+                // prints helpful debugging message
+                Serial.println(F("2.Please insert the SD card!"));
+                // repeat this process while the DFPlayerMini is still not communicating
+                while(true);
+              }
+
+              // if the communication between the arduino and the DFPlayerMini has started, print a
+              // success message
+              Serial.println(F("DFPlayer Mini online."));
+
+              // FOR THE BELLY
+              // for loop that goes through the readings array
+              for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+                // sets each index to 0
+                readings_belly[thisReading] = 0;
+              }
+              // END THE BELLY
+
+              // FOR THE NOSE
+              // for loop that goes through the readings array
+              for (int thisReading2 = 0; thisReading2 < numReadings; thisReading2++) {
+                // sets each index to 0
+                readings_nose[thisReading2] = 0;
+              }
+              // END THE NOSE
+
+
+              // sets the volume of the speaker (a value from 0 - 30)
+              myDFPlayer.volume(10);
+
+            }
+
+
+
+            //the loop function runs continously
+            void loop() {
+
+              // SMOOTHING CODE FOR BELLY
+              // subtracts the last reading so the array doesn't have old values
+              total_belly = total_belly - readings_belly[readIndex_belly];
+              // read from the sensor and store the value in the array
+              readings_belly[readIndex_belly] = belly.capacitiveSensor(30);
+              // add the reading to the total
+              total_belly = total_belly + readings_belly[readIndex_belly];
+              // move forward to the next index in the array
+              readIndex_belly = readIndex_belly + 1;
+
+              // if the end of the array has been reached
+              if (readIndex_belly >= numReadings) {
+                // return to the beginning of the array
+                readIndex_belly = 0;
+              }
+
+              // calculate the average of the readings
+              average_belly = total_belly / numReadings;
+              // print the sensor number to the screen for debugging purposes
+              Serial.print("1: ");
+              // print the smoothed sensor value to the screen for debugging purposes
+              Serial.println(average_belly);
+              // END SMOOTHING CODE FOR BELLY
+
+
+              // SMOOTHING CODE FOR NOSE
+              // subtracts the last reading so the array doesn't have old values
+              total_nose = total_nose - readings_nose[readIndex_nose];
+              // read from the sensor and store the value in the array
+              readings_nose[readIndex_nose] = nose.capacitiveSensor(30);
+              // add the reading to the total
+              total_nose = total_nose + readings_nose[readIndex_nose];
+              // move forward to the next index in the array
+              readIndex_nose = readIndex_nose + 1;
+
+              // if the end of the array has been reached
+              if (readIndex_nose >= numReadings) {
+                // return to the beginning of the array
+                readIndex_nose = 0;
+              }
+
+              // calculate the average of the readings
+              average_nose = total_nose / numReadings;
+              // print the sensor number to the screen for debugging purposes
+              Serial.print("2: ");
+              // print the smoothed sensor value to the screen for debugging purposes
+              Serial.println(average_nose);
+              // END SMOOTHING CODE FOR NOSE
+
+
+              // calculate if the smoothed value is significantly larger than the previous value
+              // (meaning it was touched)
+              int touched_belly = average_belly - 3;
+              // calculate if the smoothed value is significantly larger than the previous value
+              // (meaning it was touched)
+              int touched_nose = average_nose - 5;
+
+              // if the new value for the belly is still larger than the previous value with some
+              // subtractions,
+              // that means the area was pressed
+              if (touched_belly > previousVal_belly && calibrating_belly > 10) {
+                // play the first track on the mp3 player
+                myDFPlayer.play(1);
+                // wait until the 7-second track finishes
+                delay(7000);
+                // if the new value for the nose is still larger than the previous value with some
+                // subtractions, that means the area was pressed
+              } else if (touched_nose > previousVal_nose) {
+                // play the second track on the mp3 player
+                myDFPlayer.play(2);
+                // wait for the 9-second track to finish
+                delay(9000);
+              }
+
+              // set the old current value to the new previous value for the belly sensor
+              previousVal_belly = average_belly;
+              // set the old current value to the new previous value for the nose sensor
+              previousVal_nose = average_nose;
+
+              // increment calibrating so the belly knows when it can accept readings
+              calibrating_belly = calibrating_belly + 1;
+
+              // delay in between readings for more stability
+              delay(500);
+
+            }
+          <pre><code>
+          <figcaption>
+            The code is long and does multiple things at the same time, so I tried my best to isolate
+            them via code comments. The program starts out by importing the libraries needed to do
+            capacitive sensing and talk with the DFPlayerMini. The code then declares a lot of
+            variables and objects that are needed later in the program.
+
+            Right after the libraries is the smoothing code. Since capacitive sensing fluctuates a lot,
+            I smooth the value before I analyze it to see if I should turn on the speaker or not.
+            The same process is completed for both the belly and the nose sensor, and declares four
+            variables that keep track of the placement in the array, get rid of old values in the
+            array, and keep track of the total and average of the inputs.
+
+            Next is the calibrating code. For some reason, upon inital turn on, the belly sensor takes
+            a bit to even out. This variable declares a set time to wait before attempting to read
+            the belly sensor, ensuring there's a stable value. This calibration period could be
+            exaplained by the fluff and fur surrounding the wire.
+
+            Next is the DFPlayerMini code that creates an object and instantiates serial communication
+            to receive from the RX pin and transmit to the TX pin.
+
+            Next is the capacitive sensing intializations. These lines create two sensors (one for
+            the otter's belly, and one for the nose) that can receive inputs.
+
+            The last intialization lines are creating places to store the previous read values from
+            both sensors. Because capactive sensing can flucuate dramatically with an environment change,
+            I didn't want my breakpoint for the sound to be a number. Instead, I chose my breakpoint
+            to be how much a current value is above the previous value, which indicates a touch in
+            any environment.
+
+            The setup() function starts by starting the communication speed for the arduino and mp3,
+            and the typical serial we've used before. Both speeds are set to 9600. The code then
+            checks the connection between the DFPlayerMini, and if there is no connection then the
+            code displays debugging messages. If the conenction is fine, the code moves on to initialize
+            both of the reading arrays (for the belly and nose) to have initial starting values of 0.
+            Lastly, the function sets the volume level so the speaker is loud enough to be heard
+            through the otter's fur.
+
+            The loop function runs continously, and is responsible for triggering what facts are
+            played and when. The smoothing code for the belly and the nose is the same, just with
+            different variables. For each sensor, the code gets rid of the oldest value, adds
+            in the new value, adds the total of the values, and then averages those values to
+            create the new smoothed value. If the end of the array has been reached, the code just
+            starts over at the beginning of the array. The effect of this code is ensuring that
+            there's no outliers and extreme values throwing off the sensor. This stabalizes the
+            capactive sensors.
+
+            The second part of the loop() function tries to tell if the sensor was touched. It takes
+            the new smoothed value, subtracts a certain amount (different for each sensor), and then
+            compares it with the previous value. If the new value is still larger than the previous
+            value even after the subtractions, this means there was a big enough change to symbolize
+            a touch. A different track (according to which sensor was touched) is played, and the code
+            waits for the track to finish.
+
+            To set the code up for next time, the old current value is set to the new previous value
+            to continue the chain of comparisons. It also increments the calibrating variable by 1
+            to count down the time until the belly sensor is calibrated and can accept sensor readings.
+            The last thing in the loop() function is a small delay to set up for the next reading.
+          </figcaption>
+        </figure>
+      </section>
+      <h5>05: Circuit</h5>
+      <section id="video">
+        <figure>
+          <img src="final project/circuit.jpg" alt="circuit" class="space2"/>
+          <figcaption>
+            Although it looks busy, the circuit matches the above schematic. The wire colors are
+            mostly color coordinated to help with understanding. The first capacitive sensing circuit
+            are the orange wires, and the second sensing circuit has the green wires. The RX and TX wires
+            for the DFPlayerMini are yellow, red is power, black is ground, and the blue wires go
+            to the speaker.
+            <br>
+            <br>
+            I chose the 10M ohm resistors for the capactive sensing because I needed to sense light
+            touch through the otter's thick fur. Testing 1M ohm resistors strung together worked
+            when actual force was put on the otter, but using a 10M resistor allowed the user to do
+            a light belly scratch or a lighter bop on the nose rather than the forced push.
+            <br>
+            <br>
+            I chose the 1K and 2K resistors based off of suggestions from the internet. Initially,
+            when I connected my speaker to my DFPlayerMini, it was broadcasting a loud, obnoxious
+            sound. When I went troubleshooting on Google, people said to add resistors before the RX
+            pin. I added a 2k resistor like google suggeseted, but I was still getting some background
+            noise. I added another 1K resistor and it took care of the rest of the background noise.
+            <br>
+            <br>
+            The last resistor I used was just between power and ground. I was connecting my Arduino
+            to a power bank, and in order to keep that power bank on I needed to constantly draw minimal
+            amounts of current. For that reason, I chose an 100ohm resistor to draw minimal current.
+          </figcaption>
+        </figure>
+      </section>
+      <h5>06: Soldering</h5>
+      <section id="video">
+        <figure>
+          <img src="final project/soldering.jpg" alt="circuit" class="space2"/>
+          <figcaption>
+            In order to fit my circuit into my otter, I needed to solder it so the wires would stay
+            in place and be able to shrink onto a smaller base than the large breadboard given
+            in the arduino starter kit. This was my first time soldering in a while, so the
+            execution wasn't perfect. But, it works! Because of this soldering, I'm able to fit
+            my circuit into my otter without worrying about wires falling out.
+          </figcaption>
+        </figure>
+      </section>
+      <h5>07: Video</h5>
+      <section id="video">
+        <figure>
+          <video src="final project/video.mp4" alt="animation" width= "500" controls class="space">
+          </video>
+          <figcaption>
+            This is my final project in action! The otter says a fact about keystone species and sea
+            urchins if you boop his nose, and he says a different fact about otter's fur when you
+            tickle his belly.
+          </figcaption>
+        </figure>
+      </section>
       </main>
       <footer>
         <hr>
