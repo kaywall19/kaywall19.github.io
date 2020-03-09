@@ -16,9 +16,9 @@
       <main>
         <h5>00: Overview</h5>
         <p id="overview">
-          Making an otter say facts about itself based on various touches by the user is my final
-          project. If you scratch the otter's belly, it will say a fact about otters. If you boop the
-          otter's nose, the otter will say a different fact.
+          This project makes a prototype of a kid's toy. Based on various touches by the user, the
+          otter will say different facts about otter's. If you scratch the otter's belly, it will
+          say a fact about otters, and if you boop the otter's nose, it will say a different fact.
         </p>
         <h5>01: Brainstorming Ideas</h5>
         <section id= "schematic">
@@ -29,7 +29,7 @@
             <figcaption>
               These are my brainstormed ideas for potential final projects. The first idea is an
               interactive stuffed animal that gives out facts when you interact with various parts
-              of its body. For example, if you boop the lions nose he could give you a fact about
+              of its body. For example, if you boop the lions' nose he could give you a fact about
               lions and their sensing capabilities. This is my favorite idea because I love stuffed
               animals.
               <br>
@@ -62,11 +62,11 @@
             <li>2k ohm resistor (1)</li>
             <li>1k ohm resistor (1)</li>
             <li>Wires (18)</li>
-            <li>DFPlayerMini (1)</li>
+            <a href="https://wiki.dfrobot.com/DFPlayer_Mini_SKU_DFR0299"><li>DFPlayerMini (1)</li></a>
             <li>Arduino Uno (1) </li>
             <li>Arduino cable (1)</li>
-            <li>Mini SD card (1)</li>
-            <li>Speaker for DFModule (1)</li>
+            <a href="https://www.dfrobot.com/product-1190.html"><li>Mini SD card (1)</li></a>
+            <a href="https://smile.amazon.com/gp/product/B07FTB281F/ref=ppx_od_dt_b_asin_title_s00?ie=UTF8&psc=1"><li>Speaker for DFModule (1)</li></a>
           </ul>
         </section>
         <h5>03: Schematic</h5>
@@ -74,8 +74,7 @@
           <figure>
             <img src="final project/schematic.jpg" alt="schematic"/>
             <figcaption>
-              The schematic for my final project is a bit more complicated than the past homework
-              assignments. There are two capacitive sensors, each connected to a send and receiving
+              There are two capacitive sensors, each connected to a send and receiving
               pin. Each sensor has one, 10M ohm resistor so touch can be sensed through the otter's
               thick fur. The two sensing wires go to the otter's belly and nose. The DFPlayerMini was
               the most complicated to wire, but I followed the datasheets for the component so I
@@ -331,7 +330,7 @@
             variables and objects that are needed later in the program.
 
             Right after the libraries is the smoothing code. Since capacitive sensing fluctuates a lot,
-            I smooth the value before I analyze it to see if I should turn on the speaker or not.
+            I smoothed the value before I analyze it to see if I should turn on the speaker or not.
             The same process is completed for both the belly and the nose sensor, and declares four
             variables that keep track of the placement in the array, get rid of old values in the
             array, and keep track of the total and average of the inputs.
